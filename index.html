@@ -1,0 +1,939 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="לך תביא">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#f3f6ef">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}</style>
+</head>
+<body>
+<title>מותק, לך תביא</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Suez+One&family=Assistant:wght@400;600;700;800&display=swap">
+<style>
+/* Layout: one narrow phone column — mode switch, sticky store strip, store sections as stacked lists, fixed action bar at the bottom */
+:root{
+  --paper:#f3f6ef; --card:#ffffff; --ink:#1d2719; --muted:#65705e; --line:#dce3d4; --soft:#e8eee1;
+  --accent:#efcd7e; --accent-ink:#3b2e10; --done:#6a9e74;
+  --veg:#5f8a5a; --bake:#a8834a; --bread:#8c6d58; --spice:#a97a80; --fish:#5d7f9c; --extra:#8a7499;
+  --veg-t:#dcebd6; --bake-t:#f2e3c6; --bread-t:#e8dccf; --spice-t:#f2dde0; --fish-t:#d8e5f0; --extra-t:#e7def0;
+  --danger:#c0392b; --alert-bg:#f8dcd7; --alert-ink:#9a3328; --alert-line:#e9b4ab;
+  --f-display:"Suez One","Frank Ruhl Libre",Georgia,serif;
+  --f-body:"Assistant","Segoe UI",Arial,sans-serif;
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#121810; --card:#1a2318; --ink:#e7eee2; --muted:#9ba696; --line:#2d3829; --soft:#222d1f;
+  --accent:#d9b766; --accent-ink:#2a2008; --done:#7fb489;
+  --veg:#a3c99c; --bake:#dcc08e; --bread:#c9ad98; --spice:#dcaab0; --fish:#a3c1db; --extra:#c3afd3;
+  --veg-t:#2c3b2a; --bake-t:#3d3423; --bread-t:#3a3029; --spice-t:#3e2c2f; --fish-t:#26323d; --extra-t:#33293b;
+  --danger:#ef6f5f; --alert-bg:#45221e; --alert-ink:#f4b0a6; --alert-line:#6b3229; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --paper:#121810; --card:#1a2318; --ink:#e7eee2; --muted:#9ba696; --line:#2d3829; --soft:#222d1f;
+  --accent:#d9b766; --accent-ink:#2a2008; --done:#7fb489;
+  --veg:#a3c99c; --bake:#dcc08e; --bread:#c9ad98; --spice:#dcaab0; --fish:#a3c1db; --extra:#c3afd3;
+  --veg-t:#2c3b2a; --bake-t:#3d3423; --bread-t:#3a3029; --spice-t:#3e2c2f; --fish-t:#26323d; --extra-t:#33293b;
+  --danger:#ef6f5f; --alert-bg:#45221e; --alert-ink:#f4b0a6; --alert-line:#6b3229; color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.4;
+  direction:rtl;text-align:right;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:0 120px;-webkit-tap-highlight-color:transparent}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--paper)}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:560px;margin:0 auto}
+
+/* top */
+.mode{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:var(--soft);border-radius:999px;padding:4px;margin-top:14px}
+.mode button{border:0;background:transparent;border-radius:999px;padding:9px 6px;font-weight:700;color:var(--muted)}
+.mode button[aria-pressed="true"]{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgb(0 0 0 / .12)}
+.top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin:18px 0 6px}
+h1{font-family:var(--f-display);font-weight:400;font-size:2.1rem;line-height:1.05;margin:0;text-wrap:balance}
+.date{color:var(--muted);font-weight:600;margin-top:4px}
+.ghost{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:7px 13px;font-size:.88rem;font-weight:700;white-space:nowrap}
+.ghost.warn{border-color:var(--danger);color:var(--danger)}
+
+/* store strip */
+.strip{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--paper);margin:10px calc(-1 * max(16px,env(safe-area-inset-left,0px))) 0;padding:8px max(16px,env(safe-area-inset-left,0px));overflow-x:auto;display:flex;gap:8px;scrollbar-width:none;border-bottom:1px solid var(--line)}
+.strip::-webkit-scrollbar{display:none}
+.strip button{flex:none;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:6px 12px;font-weight:700;font-size:.92rem;display:flex;align-items:center;gap:6px}
+.strip .dot{width:9px;height:9px;border-radius:50%;background:var(--c)}
+.strip .n{font-variant-numeric:tabular-nums;color:var(--muted);font-weight:600}
+
+/* store section */
+.store{margin-top:22px;scroll-margin-top:calc(env(safe-area-inset-top,0px) + 62px)}
+.store-h{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.store-h .bar{width:6px;height:26px;border-radius:3px;background:var(--c)}
+.store-h h2{font-family:var(--f-display);font-weight:400;font-size:1.35rem;margin:0;flex:1;min-width:0}
+.store-h .cnt{color:var(--muted);font-size:.9rem;font-weight:600;font-variant-numeric:tabular-nums}
+.linkbtn{border:0;background:none;color:var(--c);font-weight:700;font-size:.9rem;padding:6px 2px}
+.items{list-style:none;margin:0;padding:0;background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.items:empty{display:none}
+.row{display:flex;gap:12px;align-items:flex-start;padding:11px 12px;border-top:1px solid var(--line)}
+.row:first-child{border-top:0}
+.check{flex:none;width:30px;height:30px;border-radius:9px;border:2px solid var(--line);background:transparent;display:grid;place-items:center;padding:0;margin-top:1px}
+.check svg{width:18px;height:18px;opacity:0}
+.row.on .check{background:var(--ct);border-color:var(--c);color:var(--c)}
+.row.on .check svg{opacity:1}
+.main{flex:1;min-width:0}
+.line1{display:flex;align-items:center;gap:8px;min-height:32px}
+.name{flex:1 1 7.5em;min-width:0;font-weight:600;overflow-wrap:break-word}
+.row:not(.on) .name{color:var(--muted);font-weight:400}
+.step{display:flex;align-items:center;border:1px solid var(--line);border-radius:999px;flex:none}
+.step button{width:30px;height:32px;border:0;background:none;font-size:1.25rem;font-weight:700;line-height:1;color:var(--c)}
+.step .q{min-width:1.8em;text-align:center;font-weight:800;font-variant-numeric:tabular-nums;font-size:.98rem}
+.line1{flex-wrap:wrap;row-gap:4px}
+.step .q .nq{display:block;font-size:.7rem;line-height:1.1;font-weight:700;color:var(--muted);white-space:normal}
+.ctl{display:grid;grid-template-columns:136px 5.6em 32px;align-items:center;column-gap:8px;flex:none}
+.ctl .step{justify-content:space-between}
+.step-gap{width:136px}
+.unit{position:relative;display:flex;align-items:center;justify-content:flex-start;height:32px;padding:0;color:var(--ink);font-weight:600;font-size:.92rem;white-space:nowrap}
+.unit span{display:inline-flex;align-items:center;gap:3px}
+.unit svg{width:12px;height:12px;color:var(--c)}
+.unit-in{width:100%;min-width:0;border:1px solid var(--c);background:var(--card);border-radius:8px;padding:4px 6px;font-size:16px;height:32px}
+.unit select{position:absolute;inset:0;width:100%;height:100%;opacity:0;font-size:16px}
+.unit:focus-within{outline:3px solid var(--accent);outline-offset:1px;border-radius:6px}
+.notebtn{flex:none;width:32px;height:32px;border:0;background:none;border-radius:8px;color:var(--muted);display:grid;place-items:center;padding:0}
+.notebtn svg{width:20px;height:20px}
+.notebtn.has{color:var(--c)}
+.opts{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}
+.opts button{border:1px solid var(--line);background:transparent;border-radius:999px;padding:4px 12px;font-size:.88rem;font-weight:600;color:var(--muted)}
+.opts button[aria-pressed="true"]{background:var(--ct);border-color:var(--c);color:var(--ink)}
+.note-in{width:100%;margin-top:7px;border:1px solid var(--line);background:var(--soft);border-radius:10px;padding:7px 10px;font-size:.95rem}
+.row:not(.on) .note-in{display:none}
+
+.more{margin-top:10px}
+.more-h{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:.88rem;font-weight:700;margin-bottom:7px}
+.more-h input{flex:1;min-width:0;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:5px 12px;font-size:.9rem;font-weight:400}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{border:1px dashed var(--c);background:transparent;border-radius:999px;padding:6px 12px;font-size:.93rem;display:flex;gap:5px;align-items:center}
+.chip b{color:var(--c);font-weight:800}
+.empty-note{color:var(--muted);font-size:.92rem;padding:4px 2px}
+
+/* add & edit */
+.addbtn{margin-top:10px;border:0;background:none;color:var(--c);font-weight:700;padding:6px 2px}
+.addform{margin-top:10px;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px;display:grid;gap:9px}
+.addform .r{display:flex;gap:8px;flex-wrap:wrap}
+.addform input,.addform select,.erow input,.erow select{border:1px solid var(--line);background:var(--paper);border-radius:10px;padding:8px 10px;min-width:0}
+.addform .nm{flex:1 1 100%}
+.addform .qt{width:5em}
+.addform select{flex:1}
+.primary{border:1px solid var(--c);background:var(--ct);color:var(--ink);border-radius:10px;padding:9px 16px;font-weight:800}
+.erow{display:grid;grid-template-columns:34px 1fr 4.2em 5.4em 34px;gap:6px;align-items:center;padding:10px;border-top:1px solid var(--line)}
+.erow:first-child{border-top:0}
+.erow .dn{grid-column:2 / 5;font-size:.9rem}
+.star{width:34px;height:34px;border:0;background:none;font-size:1.35rem;color:var(--line);padding:0}
+.star[aria-pressed="true"]{color:var(--accent)}
+.del{width:34px;height:34px;border:0;background:none;color:var(--muted);font-size:1.3rem;border-radius:8px;padding:0}
+.del.arm{background:var(--danger);color:#fff;font-size:.72rem;font-weight:800}
+.legend{color:var(--muted);font-size:.86rem;margin:2px 2px 8px}
+
+/* bottom bar */
+.bar-bottom{position:fixed;inset:auto 0 0;z-index:8;background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:1px solid var(--line);
+  padding:10px max(16px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.bar-bottom .in{max-width:560px;margin:0 auto;display:flex;gap:10px;align-items:center}
+.bar-bottom .sum{flex:1;min-width:0;font-weight:700;font-size:.95rem}
+.bar-bottom .sum span{display:block;color:var(--muted);font-weight:600;font-size:.82rem}
+.cta{border:0;background:var(--accent);color:var(--accent-ink);border-radius:999px;padding:12px 20px;font-weight:800;font-size:1rem;white-space:nowrap}
+.cta:disabled{opacity:.45}
+
+/* sheet */
+.sheet{position:fixed;inset:0;z-index:20;background:rgb(0 0 0 / .45);display:flex;align-items:flex-end;justify-content:center}
+.sheet-card{background:var(--card);width:100%;max-width:560px;max-height:92%;overflow-y:auto;border-radius:20px 20px 0 0;
+  padding:20px max(18px,env(safe-area-inset-right,0px)) calc(20px + env(safe-area-inset-bottom,0px)) max(18px,env(safe-area-inset-left,0px));display:grid;gap:12px}
+.sheet h2{font-family:var(--f-display);font-weight:400;font-size:1.6rem;margin:0}
+.sub{color:var(--muted);margin:-6px 0 0;font-weight:600}
+.preview{white-space:pre-wrap;direction:rtl;text-align:right;background:var(--soft);border-radius:12px;padding:12px 14px;margin:0;font-family:var(--f-body);font-size:.95rem;max-height:38vh;overflow-y:auto;overflow-wrap:anywhere}
+.recip{display:grid;grid-template-columns:1fr 1.4fr;gap:8px}
+.recip label{display:grid;gap:3px;font-size:.85rem;font-weight:700;color:var(--muted)}
+.recip input{border:1px solid var(--line);background:var(--paper);border-radius:10px;padding:9px 10px;font-weight:600;color:var(--ink);min-width:0}
+.wa{display:flex;justify-content:center;align-items:center;gap:8px;text-decoration:none;background:#4f9e72;color:#fff;border-radius:14px;padding:14px;font-weight:800;font-size:1.08rem}
+.wa svg{width:22px;height:22px}
+.btns{display:flex;gap:8px}
+.btns button{flex:1;border:1px solid var(--line);background:var(--card);border-radius:12px;padding:10px;font-weight:700}
+.hint{color:var(--muted);font-size:.88rem;margin:0}
+.after{background:var(--soft);border-radius:12px;padding:12px;display:grid;gap:8px;font-size:.95rem}
+
+/* shopping mode */
+.progress{height:8px;background:var(--soft);border-radius:999px;overflow:hidden;margin:10px 0 2px}
+.progress i{display:block;height:100%;background:var(--done);border-radius:999px;transition:width .3s}
+.prog-t{color:var(--muted);font-weight:700;font-size:.92rem;font-variant-numeric:tabular-nums}
+.srow{display:flex;align-items:center;gap:12px;padding:12px;border-top:1px solid var(--line);background:var(--card)}
+.srow:first-child{border-top:0}
+.srow .main{flex:1;min-width:0}
+.srow .nm{font-weight:700;font-size:1.06rem;overflow-wrap:anywhere}
+.srow .qt{font-weight:800;color:var(--c);font-variant-numeric:tabular-nums;white-space:nowrap;margin-inline-start:6px}
+.srow .nt{color:var(--muted);font-size:.9rem;margin-top:2px}
+.pick{flex:none;width:46px;height:46px;border-radius:50%;border:2px solid var(--c);background:var(--ct);color:var(--c);display:grid;place-items:center;padding:0}
+.pick svg{width:24px;height:24px;opacity:.35}
+.srow.got{background:var(--soft)}
+.srow.got .nm{text-decoration:line-through;text-decoration-thickness:2px;color:var(--muted);font-weight:600}
+.srow.got .qt,.srow.got .nt{color:var(--muted)}
+.srow.got .pick{background:var(--done);border-color:var(--done);color:var(--card)}
+.srow.got .pick svg{opacity:1}
+.got-sep{padding:6px 12px;font-size:.8rem;font-weight:800;letter-spacing:.02em;color:var(--done);background:var(--soft);border-top:1px solid var(--line)}
+.allgot{color:var(--done);font-weight:800;font-size:.9rem}
+.load{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:grid;gap:10px;margin-top:18px}
+.load h2{font-family:var(--f-display);font-weight:400;font-size:1.3rem;margin:0}
+.load p{margin:0;color:var(--muted)}
+.load textarea{width:100%;min-height:110px;border:1px solid var(--line);background:var(--paper);border-radius:10px;padding:10px;font-size:.95rem;direction:rtl}
+.load .err{color:var(--danger);font-weight:700;font-size:.92rem}
+.load .primary{--c:var(--veg);--ct:var(--veg-t)}
+.stick{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--paper);margin:10px calc(-1 * max(16px,env(safe-area-inset-left,0px))) 0;padding:0 max(16px,env(safe-area-inset-left,0px))}
+.stick .strip{position:static;margin:0 calc(-1 * max(16px,env(safe-area-inset-left,0px)))}
+.alert{background:var(--alert-bg);color:var(--alert-ink);border:1px solid var(--alert-line);border-radius:12px;padding:10px 12px;margin-top:8px;display:flex;gap:10px;align-items:flex-start}
+.alert .txt{flex:1;min-width:0;font-size:.92rem;overflow-wrap:anywhere}
+.alert b{display:block;font-size:1rem;margin-bottom:2px}
+.alert button{flex:none;border:1px solid var(--alert-ink);background:transparent;color:var(--alert-ink);border-radius:999px;padding:6px 12px;font-weight:800;font-size:.88rem}
+.tag{display:inline-block;font-size:.72rem;font-weight:800;background:var(--alert-bg);color:var(--alert-ink);border-radius:999px;padding:1px 8px;margin-inline-start:7px;vertical-align:2px}
+.pending{font-style:normal;color:var(--alert-ink)}
+.bar-bottom .ghost.big{padding:11px 18px;font-size:.95rem}
+#mShop.alert-dot::after{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--alert-ink);margin-inline-start:6px;vertical-align:2px}
+.notice{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:10px;display:flex;gap:10px;align-items:flex-start}
+.notice .txt{flex:1;min-width:0;font-size:.92rem}
+.notice b{display:block}
+.notice button{flex:none;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:6px 12px;font-weight:700;font-size:.85rem}
+.hbtns{display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+.pastebar{margin-top:10px}
+.pastebar textarea{width:100%;border:1px dashed var(--line);background:var(--card);border-radius:12px;padding:10px 12px;font-size:16px;resize:none;direction:rtl;min-height:44px}
+.pastebar .err{margin-top:6px;color:var(--danger);font-weight:700;font-size:.92rem}
+.toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:9px 16px;border-radius:999px;font-weight:700;z-index:30;font-size:.92rem;max-width:90vw;text-align:center}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+  <div class="mode" role="group" aria-label="מצב">
+    <button id="mEdit" aria-pressed="true">עריכת הרשימה</button>
+    <button id="mShop" aria-pressed="false">בזמן הקניות</button>
+  </div>
+  <div id="editView"></div>
+  <div id="shopView" hidden></div>
+</div>
+
+<div class="bar-bottom" id="bottom"><div class="in" id="bottomIn"></div></div>
+
+<div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+  <div class="sheet-card">
+    <h2 id="sheetTitle">לשלוח את הרשימה?</h2>
+    <p class="sub" id="sheetSub"></p>
+    <pre class="preview" id="preview"></pre>
+    <div class="recip">
+      <label for="rName">שם<input id="rName" autocomplete="off"></label>
+      <label for="rPhone">מספר וואטסאפ<input id="rPhone" type="tel" inputmode="tel" placeholder="050-1234567" autocomplete="off"></label>
+    </div>
+    <a class="wa" id="waLink" href="https://wa.me/" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2c-1.5 0-3-.4-4.3-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1-.7-.3-1.4-.7-2-1.3-.5-.5-.9-1-1.3-1.6-.1-.2 0-.4.1-.5l.4-.5.3-.4v-.4l-.8-1.9c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3c-.3.3-1 1-1 2.4s1 2.8 1.2 3c.1.2 2 3.1 4.9 4.3 1.8.8 2.5.8 3.4.7.6-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3Z"/></svg>
+      <span id="waLabel">שליחה בוואטסאפ</span>
+    </a>
+    <p class="hint">הוואטסאפ ייפתח עם הרשימה מוכנה בצ׳אט. נשאר רק ללחוץ שם על שליחה.</p>
+    <div class="after" id="after" hidden>
+      <div>הרשימה נשמרה כאן. אפשר להמשיך לשנות אותה ולשלוח עדכון עד הקניות.</div>
+    </div>
+    <div class="btns">
+      <button id="copyBtn">העתקת הטקסט</button>
+      <button id="closeSheet">חזרה לעריכה</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+"use strict";
+/* כתובת האפליקציה — נכנסת לסוף ההודעה כדי שהרשימה תיפתח במצב קניות */
+const APP_URL = "https://claude.ai/artifact/MoVaXmSjzpUMW97jG1K2cx";
+/* on its own website the list travels inside the link; inside Claude it cannot */
+const STANDALONE = /^https?:$/.test(location.protocol) && !/(^|\.)claude\.ai$|claudeusercontent\.com$/.test(location.hostname);
+
+const UNITS = ["יח׳","ק״ג","צרור","שקית"];
+const PICK_UNITS = ["יח׳","ק״ג","צרור","שקית"];
+const unitName = u => u === "ללא" ? "בלי כמות" : u;
+function unitOptions(cur, withNone) {
+  const base = withNone ? UNITS : PICK_UNITS;
+  const list = base.includes(cur) ? base : [...base, cur];
+  return list.map(u => `<option value="${esc(u)}" ${u === cur ? "selected" : ""}>${esc(unitName(u))}</option>`).join("") + `<option value="__other">אחר…</option>`;
+}
+const unitInput = i => `<input class="unit-in" data-act="unit-in" maxlength="14" placeholder="יחידה" aria-label="יחידת מידה ל${esc(i.name)}">`;
+const KINDS = [["reg","קבוע כל שבוע"],["occ","לפעמים"],["once","רק הפעם"]];
+const LS_STATE = "kniyot-state-v2", LS_STATE_OLD = "kniyot-state-v1", LS_SHOP = "kniyot-shop-v1", LS_MODE = "kniyot-mode";
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const uid = () => Math.random().toString(36).slice(2, 9);
+const stepOf = u => u === "ק״ג" ? 0.5 : 1;
+const fmtQ = q => (Math.round(q * 100) / 100).toString();
+const lsGet = k => { try { return localStorage.getItem(k); } catch { return null; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch {} };
+const ICON_CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+const ICON_NOTE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12.5h5"/></svg>';
+
+/* ---------- רשימת המוצרים ההתחלתית (לפי הרשימה של השבוע שעבר) ---------- */
+const it = (name, unit, dq, reg, dn = "") => ({ id: uid(), name, unit, dq, reg, dn });
+const opt = (item, opts, dc) => Object.assign(item, { opts, dc });
+const SIZES3 = ["קטנה","בינונית","גדולה"];
+function VEG_ADD1() { return [
+  it("בצל סגול","ק״ג",1,false), it("כרוב לבן","יח׳",1,false), it("קלמנטינות","ק״ג",1,false),
+  it("פלפל ירוק חריף","יח׳",3,false), it("תפוחי פינק ליידי","יח׳",6,false), it("באקצ׳וי","יח׳",2,false),
+  it("לבבות חסה","חבילה",1,false), it("מנגו","יח׳",2,false), it("אפרסמון","יח׳",4,false)
+]; }
+const SEED = () => [
+  { id: "veg", name: "ירקות", color: "veg", items: [
+    it("מלפפונים דקים","יח׳",20,true), it("עגבניות קשות","יח׳",7,true), it("עגבניות שרי","חבילה",1,true),
+    it("תפוח אדמה אדום","ק״ג",1,true), it("שקית ירקות","שקית",1,true,"קולורבי, גזר, כרוב סגול/סלק — לבדוק תוקף"),
+    it("כוסברה","צרור",3,true), it("פטרוזיליה","צרור",1,true), it("תפוחים צהובים","יח׳",15,true),
+    it("גמבה אדומה","יח׳",3,true), it("גמבה כתומה","יח׳",2,true), it("לימונים","יח׳",5,true), it("ביצים L","תבנית",1,true),
+    it("תירס","חבילה",1,false), it("ענבים","חבילה",1,false,"רק קשים, שני צבעים"), it("נקטרינה / אפרסק","יח׳",8,false,"קשים"),
+    it("תפוזים","יח׳",4,false,"אם יש"), it("קיווי ירוק","יח׳",5,false,"קשים"), it("פלפלונים","חבילה",1,false),
+    it("שושקה","יח׳",5,false,"רק אם יש קשות"), it("בצל","ק״ג",1,false), it("גזר","ק״ג",1,false), it("בטטה","ק״ג",1,false),
+    it("קישוא","ק״ג",1,false), it("חציל","יח׳",2,false), it("אבוקדו","יח׳",3,false), it("חסה","יח׳",1,false),
+    it("נענע","צרור",1,false), it("שמיר","צרור",1,false), it("בצל ירוק","צרור",1,false), it("שום","יח׳",1,false),
+    it("ברוקולי","יח׳",1,false), it("כרובית","יח׳",1,false), it("פטריות","חבילה",1,false), it("בננות","ק״ג",1,false),
+    it("אגסים","יח׳",4,false), it("תותים","חבילה",1,false), it("מלון","יח׳",1,false), it("אבטיח","יח׳",1,false),
+    ...VEG_ADD1()
+  ]},
+  { id: "naama", name: "מאפיית נעמה", color: "bake", items: [
+    it("סביח","יח׳",2,true), it("בורקסים","יח׳",1,true),
+    opt(it("מאפה שוקולד","יח׳",0,true), ["רוגלך","קרואסון","מה שיש"], "מה שיש"), it("חלה","יח׳",1,true)
+  ]},
+  { id: "lechem", name: "לחם יין", color: "bread", items: [
+    it("לחם דגנים מלא","יח׳",6,true), it("חלה","יח׳",1,false)
+  ]},
+  { id: "didi", name: "תבליני דידי", color: "spice", items: [
+    opt(it("בוטנים קלויים","קופסה",1,true), SIZES3, "בינונית"),
+    opt(it("שקדים לא קלויים","שקית",1,true), ["בינונית","גדולה"], "בינונית"),
+    opt(it("פקאן לא קלוי","קופסה",1,true), SIZES3, "בינונית"),
+    opt(it("פיסטוק","קופסה",1,true), SIZES3, "בינונית"),
+    opt(it("קשיו","קופסה",1,true), SIZES3, "בינונית")
+  ]},
+  { id: "dagim", name: "דגים", color: "fish", items: [
+    opt(it("דגים (הוזמנו אתמול)","יח׳",3,true,"מפולטים ל־6 פילטים, בלי עור"), ["דניס","לברק"], "דניס")
+  ]},
+  { id: "extra", name: "נוספים ומשימות מיוחדות", color: "extra", items: [
+    it("שק מלח לבריכה","יח׳",1,false), it("גבינת סקי 5%","יח׳",4,false), it("דוריטוס ירוק","יח׳",4,false)
+  ]}
+];
+
+/* ---------- state ---------- */
+function freshSel(item) { return { on: !!item.reg, qty: item.dq, note: item.dn || "", ch: item.dc || "" }; }
+function newState() {
+  const stores = SEED(); const sel = {};
+  stores.forEach(s => s.items.forEach(i => sel[i.id] = freshSel(i)));
+  return { v: 1, seedVer: 3, stores, sel, recipient: { name: "רם", phone: "" } };
+}
+let state;
+try { state = JSON.parse(lsGet(LS_STATE) || "null"); } catch { state = null; }
+const freshStart = !state || !Array.isArray(state.stores);
+if (!state || !Array.isArray(state.stores)) {
+  state = newState();
+  try { const old = JSON.parse(lsGet(LS_STATE_OLD) || "null"); if (old && old.recipient) state.recipient = old.recipient; } catch {}
+}
+state.stores.forEach(s => s.items.forEach(i => { if (!state.sel[i.id]) state.sel[i.id] = freshSel(i); }));
+state.recipient = state.recipient || { name: "רם", phone: "" };
+if ((state.seedVer || 0) < 1) {
+  const veg = state.stores.find(s => s.id === "veg");
+  if (veg) {
+    veg.items.forEach(i => { if (i.name === "קישואים") i.name = "קישוא"; if (i.name === "חצילים") i.name = "חציל"; });
+    const have = new Set(veg.items.map(i => i.name));
+    VEG_ADD1().forEach(i => { if (!have.has(i.name)) { veg.items.push(i); state.sel[i.id] = freshSel(i); } });
+  }
+  state.seedVer = 1;
+  try { localStorage.setItem(LS_STATE, JSON.stringify(state)); } catch {}
+}
+if ((state.seedVer || 0) < 2) {
+  state.stores.forEach(st => st.items.forEach(i => { if (i.name === "בורקסים" && i.unit === "ללא") { i.unit = "יח׳"; i.dq = 1; if (state.sel[i.id] && !state.sel[i.id].qty) state.sel[i.id].qty = 1; } }));
+  state.seedVer = 2;
+  try { localStorage.setItem(LS_STATE, JSON.stringify(state)); } catch {}
+}
+if ((state.seedVer || 0) < 3) {
+  /* no more "no quantity" items: they become units with quantity 0 ("you decide") */
+  state.stores.forEach(st => st.items.forEach(i => { if (i.unit === "ללא") { i.unit = "יח׳"; i.dq = 0; if (state.sel[i.id]) state.sel[i.id].qty = 0; } }));
+  state.seedVer = 3;
+  try { localStorage.setItem(LS_STATE, JSON.stringify(state)); } catch {}
+}
+state.stores.forEach(s => { if (s.id === "extra" && s.name === "נוספים") s.name = "נוספים ומשימות מיוחדות"; });
+state.stores.forEach(s => s.items.forEach(i => { if (i.name === "שקדים לא קלויים" && i.dn === "במשקל") { i.dn = ""; if (state.sel[i.id]?.note === "במשקל") state.sel[i.id].note = ""; }
+  if (i.name === "סביח" && i.dn === "אחד ללביא ואחד לי") { i.dn = ""; if (state.sel[i.id]?.note === "אחד ללביא ואחד לי") state.sel[i.id].note = ""; } }));
+const idbOpen = (() => { let p; return () => p || (p = new Promise(res => { try { const r = indexedDB.open("kniyot", 1); r.onupgradeneeded = () => r.result.createObjectStore("kv"); r.onsuccess = () => res(r.result); r.onerror = () => res(null); } catch { res(null); } })); })();
+async function idbSet(k, v) { const db = await idbOpen(); if (!db) return; try { db.transaction("kv", "readwrite").objectStore("kv").put(v, k); } catch {} }
+async function idbGet(k) { const db = await idbOpen(); if (!db) return null; return new Promise(res => { try { const r = db.transaction("kv").objectStore("kv").get(k); r.onsuccess = () => res(r.result ?? null); r.onerror = () => res(null); } catch { res(null); } }); }
+const save = () => { const j = JSON.stringify(state); lsSet(LS_STATE, j); idbSet(LS_STATE, j); };
+
+const ui = { showLoad: false, linkError: null, customUnit: null, armImport: false, staleLink: null, editing: null, adding: null, notes: new Set(), armDel: null, armReset: false, filters: {} };
+
+/* ---------- dates ---------- */
+function weekend() {
+  const d = new Date(); d.setHours(12, 0, 0, 0);
+  const day = d.getDay();
+  const diff = day === 6 ? 6 : (5 - day + 7) % 7;
+  const fri = new Date(d); fri.setDate(d.getDate() + diff);
+  const thu = new Date(fri); thu.setDate(fri.getDate() - 1);
+  const long = x => x.toLocaleDateString("he-IL", { day: "numeric", month: "long" });
+  return { label: `חמישי–שישי · ${thu.getDate()}–${long(fri)}`, short: `${fri.getDate()}.${fri.getMonth() + 1}` };
+}
+
+/* ---------- helpers ---------- */
+const findItem = id => { for (const s of state.stores) { const i = s.items.find(x => x.id === id); if (i) return { s, i }; } return null; };
+const onCount = s => s.items.filter(i => state.sel[i.id]?.on).length;
+const totalOn = () => state.stores.reduce((a, s) => a + onCount(s), 0);
+function qtyText(q, u, ch) {
+  if (u === "ללא") return ch || "";
+  if (!q) return ch ? `תחליט, סומכת עליך (${ch})` : "תחליט, סומכת עליך";
+  const t = u === "יח׳" ? fmtQ(q) : (q === 1 && ch ? u : `${fmtQ(q)} ${u}`);
+  return ch ? `${t} ${ch}` : t;
+}
+
+/* ---------- edit view ---------- */
+function renderEdit() {
+  const w = weekend();
+  const strip = state.stores.map(s => `<button data-act="jump" data-store="${s.id}" style="--c:var(--${s.color});--ct:var(--${s.color}-t)"><span class="dot"></span>${esc(s.name)}<span class="n">${onCount(s)}</span></button>`).join("");
+  $("#editView").innerHTML = `
+    <div class="top">
+      <div><h1>מותק, לך תביא</h1><div class="date">קניות ל${w.label}</div></div>
+      <button class="ghost ${ui.armReset ? "warn" : ""}" data-act="reset">${ui.armReset ? "לחצי שוב לאישור" : "רשימה חדשה"}</button>
+    </div>
+    ${state.lastSent && state.lastSent.P && state.lastSent.P.d !== w.short ? `<div class="notice"><div class="txt"><b>הרשימה הזו נשלחה לשישי ${esc(state.lastSent.P.d)}</b>להתחיל רשימה חדשה לשבוע הזה, עם המוצרים הקבועים?</div><button data-act="reset-now">רשימה חדשה</button></div>` : ""}
+    <nav class="strip" aria-label="חנויות">${strip}</nav>
+    ${state.stores.map(renderStore).join("")}`;
+  renderBottom();
+}
+
+function renderStore(s) {
+  const c = `style="--c:var(--${s.color});--ct:var(--${s.color}-t)"`;
+  const editing = ui.editing === s.id;
+  const n = onCount(s);
+  let body;
+  if (editing) {
+    body = `<p class="legend">★ מסמן מוצר קבוע, שמסומן אוטומטית בכל רשימה חדשה. הכמות וההערה כאן הן ברירת המחדל.</p>
+      <ul class="items">${s.items.map(i => `
+      <li class="erow" data-id="${i.id}">
+        <button class="star" data-act="star" aria-pressed="${!!i.reg}" aria-label="מוצר קבוע">★</button>
+        <input data-act="e-name" value="${esc(i.name)}" aria-label="שם המוצר">
+        <input data-act="e-dq" type="number" inputmode="decimal" min="0" step="${stepOf(i.unit)}" value="${i.dq}" aria-label="כמות קבועה" ${i.unit === "ללא" ? "disabled" : ""}>
+        ${ui.customUnit === i.id ? unitInput(i) : `<select data-act="e-unit" aria-label="יחידה">${unitOptions(i.unit, true)}</select>`}
+        <button class="del ${ui.armDel === i.id ? "arm" : ""}" data-act="del" aria-label="מחיקת ${esc(i.name)}">${ui.armDel === i.id ? "למחוק?" : "×"}</button>
+        <input class="dn" data-act="e-dn" value="${esc(i.dn || "")}" placeholder="הערה קבועה (לא חובה)" aria-label="הערה קבועה">
+      </li>`).join("")}</ul>`;
+  } else {
+    const listed = s.items.filter(i => i.reg || state.sel[i.id].on);
+    const rest = s.items.filter(i => !i.reg && !state.sel[i.id].on);
+    const f = (ui.filters[s.id] || "").trim();
+    body = `<ul class="items">${listed.map(i => renderRow(i)).join("")}</ul>
+      ${listed.length === 0 ? `<div class="empty-note">אין כאן מוצרים קבועים. בחרי מהרשימה למטה או הוסיפי מוצר.</div>` : ""}
+      ${rest.length ? `<div class="more">
+        <div class="more-h">עוד ב${esc(s.name)}${rest.length > 10 ? `<input data-act="filter" data-store="${s.id}" placeholder="חיפוש…" value="${esc(f)}" aria-label="חיפוש מוצר">` : ""}</div>
+        <div class="chips">${rest.map(i => `<button class="chip" data-act="pick" data-id="${i.id}" ${f && !i.name.includes(f) ? "hidden" : ""}><b>+</b>${esc(i.name)}</button>`).join("")}</div>
+      </div>` : ""}`;
+  }
+  const add = ui.adding === s.id ? `
+    <form class="addform" data-store="${s.id}">
+      <div class="r"><input class="nm" name="nm" placeholder="${s.id === "extra" ? "מה עוד צריך? למשל: לאסוף חבילה מהדואר" : "שם המוצר"}" required></div>
+      <div class="r">
+        <input class="qt" name="qt" type="number" inputmode="decimal" min="0" step="0.5" value="1" aria-label="כמות">
+        <select name="un" aria-label="יחידה">${UNITS.map(u => `<option value="${u}" ${u === "יח׳" ? "selected" : ""}>${unitName(u)}</option>`).join("")}</select>
+        <select name="kd" aria-label="תדירות">${KINDS.map(([k, t]) => `<option value="${k}" ${k === (s.id === "extra" ? "once" : "occ") ? "selected" : ""}>${t}</option>`).join("")}</select>
+      </div>
+      <div class="r"><button class="primary" type="submit">הוספה לרשימה</button><button class="ghost" type="button" data-act="cancel-add">ביטול</button></div>
+    </form>` : `<button class="addbtn" data-act="add" data-store="${s.id}">+ ${s.id === "extra" ? "שליחות או מוצר נוסף" : "מוצר חדש"}</button>`;
+  return `<section class="store" id="st-${s.id}" ${c}>
+    <div class="store-h"><span class="bar"></span><h2>${esc(s.name)}</h2>
+      <span class="cnt">${n ? `${n} ברשימה` : ""}</span>
+      <button class="linkbtn" data-act="${editing ? "done-edit" : "edit"}" data-store="${s.id}">${editing ? "סיום" : "עריכה"}</button>
+    </div>${body}${editing ? "" : add}</section>`;
+}
+
+const UNIT_LABEL = { "ללא": "בלי כמות", "יח׳": "יחידות", "ק״ג": "ק״ג", "צרור": "צרורות", "חבילה": "חבילות", "קופסה": "קופסאות", "מגש": "מגשים", "שקית": "שקיות", "תבנית": "תבניות" };
+function renderRow(i) {
+  const sl = state.sel[i.id];
+  const open = ui.notes.has(i.id) || !!sl.note;
+  const qty = i.unit === "ללא" ? `<div class="step-gap" aria-hidden="true"></div>` : `<div class="step">
+      <button data-act="dec" aria-label="פחות">−</button>
+      <span class="q">${sl.qty ? fmtQ(sl.qty) : `<small class="nq">תחליט, סומכת עליך</small>`}</span>
+      <button data-act="inc" aria-label="יותר">+</button></div>`;
+  const unitSel = ui.customUnit === i.id ? unitInput(i) : `<label class="unit"><span aria-hidden="true">${esc(unitName(i.unit))}<svg viewBox="0 0 12 12"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><select data-act="unit" aria-label="יחידת מידה ל${esc(i.name)}">${unitOptions(i.unit, false)}</select></label>`;
+  return `<li class="row ${sl.on ? "on" : ""}" data-id="${i.id}">
+    <button class="check" data-act="toggle" aria-pressed="${sl.on}" aria-label="${esc(i.name)}">${ICON_CHECK}</button>
+    <div class="main">
+      <div class="line1"><span class="name">${esc(i.name)}</span>${sl.on ? `<div class="ctl">${qty}${unitSel}<button class="notebtn ${sl.note ? "has" : ""}" data-act="note" aria-label="הערה">${ICON_NOTE}</button></div>` : ""}</div>
+      ${sl.on && i.opts ? `<div class="opts" role="group" aria-label="בחירה">${i.opts.map(o => `<button data-act="ch" data-v="${esc(o)}" aria-pressed="${sl.ch === o}">${esc(o)}</button>`).join("")}</div>` : ""}
+      ${open && sl.on ? `<input class="note-in" data-act="note-in" value="${esc(sl.note)}" placeholder="הערה: בשלות, גודל, סוג…" aria-label="הערה ל${esc(i.name)}">` : ""}
+    </div></li>`;
+}
+
+function rerenderStore(id) {
+  const s = state.stores.find(x => x.id === id); if (!s) return;
+  const el = document.getElementById("st-" + id);
+  if (el) el.outerHTML = renderStore(s);
+  document.querySelectorAll(".strip button").forEach(b => {
+    const st = state.stores.find(x => x.id === b.dataset.store); if (st) b.querySelector(".n").textContent = onCount(st);
+  });
+  renderBottom();
+}
+
+function resetWeek() {
+  state.stores.forEach(s => {
+    s.items = s.items.filter(i => !i.once);
+    s.items.forEach(i => state.sel[i.id] = freshSel(i));
+  });
+  ui.notes.clear(); ui.editing = null; ui.adding = null; state.lastSent = null;
+  save(); renderEdit(); toast("רשימה חדשה מוכנה, עם המוצרים הקבועים");
+}
+
+/* ---------- edit-view events ---------- */
+$("#editView").addEventListener("click", e => {
+  const b = e.target.closest("[data-act]"); if (!b) return;
+  const act = b.dataset.act;
+  const row = b.closest("[data-id]"); const id = b.dataset.id || row?.dataset.id;
+  const found = id ? findItem(id) : null;
+  const storeId = b.dataset.store || found?.s.id;
+  if (act !== "reset" && ui.armReset) { ui.armReset = false; const r = $("#editView [data-act=reset]"); if (r) { r.textContent = "רשימה חדשה"; r.classList.remove("warn"); } }
+  switch (act) {
+    case "jump": document.getElementById("st-" + storeId)?.scrollIntoView({ behavior: "smooth", block: "start" }); return;
+    case "reset-now": resetWeek(); return;
+    case "reset":
+      if (ui.armReset) { ui.armReset = false; resetWeek(); } else { ui.armReset = true; b.textContent = "לחצי שוב לאישור"; b.classList.add("warn"); }
+      return;
+    case "toggle": { const sl = state.sel[id]; sl.on = !sl.on; if (sl.on) sl.qty = found.i.dq ?? 1; break; }
+    case "pick": { const sl = state.sel[id]; sl.on = true; sl.qty = found.i.dq ?? 1; break; }
+    case "ch": state.sel[id].ch = b.dataset.v; break;
+    case "inc": { const sl = state.sel[id]; sl.qty = +(sl.qty + stepOf(found.i.unit)).toFixed(2); break; }
+    case "dec": { const sl = state.sel[id]; const st = stepOf(found.i.unit); if (!sl.qty) return; sl.qty = Math.max(0, +(sl.qty - st).toFixed(2)); break; }
+    case "note": ui.notes.has(id) && !state.sel[id].note ? ui.notes.delete(id) : ui.notes.add(id);
+      rerenderStore(storeId); document.querySelector(`[data-id="${id}"] .note-in`)?.focus(); return;
+    case "edit": ui.editing = storeId; ui.adding = null; ui.armDel = null; break;
+    case "done-edit": ui.editing = null; ui.armDel = null; break;
+    case "star": found.i.reg = !found.i.reg; delete found.i.once; break;
+    case "del":
+      if (ui.armDel === id) { found.s.items = found.s.items.filter(x => x.id !== id); delete state.sel[id]; ui.armDel = null; }
+      else ui.armDel = id;
+      break;
+    case "add": ui.adding = storeId; break;
+    case "cancel-add": ui.adding = null; rerenderStore(b.closest("form").dataset.store); return;
+    default: return;
+  }
+  save(); rerenderStore(storeId);
+  if (act === "add") document.querySelector(`#st-${storeId} .addform .nm`)?.focus();
+});
+
+$("#editView").addEventListener("input", e => {
+  const t = e.target; const act = t.dataset.act; if (!act) return;
+  if (act === "filter") {
+    const f = t.value.trim(); ui.filters[t.dataset.store] = t.value;
+    t.closest(".more").querySelectorAll(".chip").forEach(c => c.hidden = !!f && !c.textContent.includes(f));
+    return;
+  }
+  const id = t.closest("[data-id]")?.dataset.id; const found = id && findItem(id); if (!found) return;
+  if (act === "note-in") { state.sel[id].note = t.value; t.closest(".row").querySelector(".notebtn")?.classList.toggle("has", !!t.value); }
+  if (act === "e-name") found.i.name = t.value;
+  if (act === "e-dn") found.i.dn = t.value;
+  if (act === "e-dq") { const v = parseFloat(t.value); if (v >= 0) found.i.dq = v; }
+  save(); if (act === "note-in") renderBottom();
+});
+$("#editView").addEventListener("change", e => {
+  const t = e.target;
+  if (t.dataset.act !== "unit" && t.dataset.act !== "e-unit") return;
+  const id = t.closest("[data-id]").dataset.id; const f = findItem(id); if (!f) return;
+  if (t.value === "__other") {
+    ui.customUnit = id; rerenderStore(f.s.id);
+    document.querySelector(`[data-id="${id}"] .unit-in`)?.focus(); return;
+  }
+  setUnit(f, id, t.value);
+});
+function setUnit(f, id, v) {
+  const prev = f.i.unit; f.i.unit = v; const sl = state.sel[id];
+  if (prev === "ללא") sl.qty = 0;
+  else if (v !== "ק״ג") sl.qty = Math.max(1, Math.round(sl.qty));
+  if (v !== "ק״ג") f.i.dq = Math.max(1, Math.round(f.i.dq || 1));
+  ui.customUnit = null; save(); rerenderStore(f.s.id);
+}
+$("#editView").addEventListener("keydown", e => { if (e.target.dataset.act === "unit-in" && e.key === "Enter") { e.preventDefault(); e.target.blur(); } });
+$("#editView").addEventListener("focusout", e => {
+  const t = e.target; if (t.dataset.act !== "unit-in") return;
+  const id = t.closest("[data-id]").dataset.id; const f = findItem(id); if (!f) return;
+  const v = t.value.trim();
+  if (v) setUnit(f, id, v); else { ui.customUnit = null; rerenderStore(f.s.id); }
+});
+$("#editView").addEventListener("submit", e => {
+  e.preventDefault();
+  const f = e.target; const sid = f.dataset.store; const s = state.stores.find(x => x.id === sid);
+  const name = f.nm.value.trim(); if (!name) return;
+  const unit = f.un.value; const qv = parseFloat(f.qt.value); const q = isNaN(qv) || qv < 0 ? 1 : qv; const kind = f.kd.value;
+  const item = { id: uid(), name, unit, dq: q, reg: kind === "reg", dn: "" };
+  if (kind === "once") item.once = true;
+  s.items.push(item); state.sel[item.id] = { on: true, qty: q, note: "" };
+  ui.adding = null; save(); rerenderStore(sid); toast(`${name} נוסף לרשימה`);
+});
+
+/* ---------- message & link ---------- */
+function snapshot() {
+  return {
+    d: weekend().short,
+    s: state.stores.map(s => [s.name, s.color, s.items.filter(i => state.sel[i.id].on)
+      .map(i => [i.name, state.sel[i.id].qty, i.unit, (state.sel[i.id].note || "").trim(), i.opts ? state.sel[i.id].ch || "" : ""])]).filter(s => s[2].length)
+  };
+}
+const sameList = (a, b) => !!a && !!b && JSON.stringify(a.s) === JSON.stringify(b.s);
+const hhmm = t => new Date(t || Date.now()).toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" });
+function flat(P) { const m = new Map(); P.s.forEach(([sn, , items]) => items.forEach(x => m.set(sn + "|" + x[0], x))); return m; }
+function diffLists(a, b) {
+  const A = flat(a), B = flat(b), added = [], removed = [], changed = [];
+  B.forEach((x, k) => { if (!A.has(k)) added.push(k); else if (JSON.stringify(A.get(k)) !== JSON.stringify(x)) changed.push(k); });
+  A.forEach((x, k) => { if (!B.has(k)) removed.push(k); });
+  return { added, removed, changed };
+}
+const nChanges = D => D ? D.added.length + D.changed.length + D.removed.length : 0;
+const nameOfKey = k => k.slice(k.indexOf("|") + 1);
+function itemLabel(P, k) { const x = flat(P).get(k); if (!x) return nameOfKey(k); const qt = qtyText(x[1], x[2], x[4]); return `${x[0]}${qt ? ` – ${qt}` : ""}`; }
+function diffLines(D, P) {
+  const L = [];
+  if (D.added.length) L.push(`נוסף: ${D.added.map(k => itemLabel(P, k)).join(", ")}`);
+  if (D.changed.length) L.push(`שונה: ${D.changed.map(k => itemLabel(P, k)).join(", ")}`);
+  if (D.removed.length) L.push(`הוסר: ${D.removed.map(nameOfKey).join(", ")}`);
+  return L;
+}
+function messageText(P, link, D) {
+  const count = P.s.reduce((a, s) => a + s[2].length, 0);
+  const L = [D ? `*מותק, לך תביא · עדכון לשישי ${P.d}*` : `*מותק, לך תביא · שישי ${P.d}*`, `${count} פריטים`, ""];
+  if (D) L.push("מה השתנה:", ...diffLines(D, P), "", "הרשימה המעודכנת:", "");
+  P.s.forEach(([name, , items]) => {
+    L.push(`*${name}*`);
+    items.forEach(([n, q, u, note, ch]) => { const qt = qtyText(q, u, ch); L.push(`• ${n}${qt ? ` – ${qt}` : ""}${note ? ` (${note})` : ""}`); });
+    L.push("");
+  });
+  if (link) L.push(STANDALONE ? "לסימון בזמן הקניות:" : "לסימון בזמן הקניות: להעתיק את ההודעה הזו ולהדביק באפליקציה", link);
+  return L.join("\n").trim();
+}
+function b64u(bytes) { let s = ""; for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""); }
+function unb64u(t) { t = t.replace(/-/g, "+").replace(/_/g, "/"); while (t.length % 4) t += "="; const s = atob(t); const b = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) b[i] = s.charCodeAt(i); return b; }
+async function encodeList(P) {
+  const bytes = new TextEncoder().encode(JSON.stringify(P));
+  if (window.CompressionStream) {
+    try { const buf = await new Response(new Blob([bytes]).stream().pipeThrough(new CompressionStream("deflate-raw"))).arrayBuffer(); return "Lz" + b64u(new Uint8Array(buf)); } catch {}
+  }
+  return "Lu" + b64u(bytes);
+}
+async function decodeList(tok) {
+  const kind = tok.slice(0, 2), body = tok.slice(2);
+  let bytes = unb64u(body);
+  if (kind === "Lz") {
+    if (!window.DecompressionStream) throw new Error("old");
+    bytes = new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream("deflate-raw"))).arrayBuffer());
+  } else if (kind !== "Lu") throw new Error("bad");
+  const P = JSON.parse(new TextDecoder().decode(bytes));
+  if (!P || !Array.isArray(P.s)) throw new Error("bad");
+  return P;
+}
+function waNumber(p) { let d = (p || "").replace(/\D/g, ""); if (d.startsWith("00")) d = d.slice(2); if (d.startsWith("0")) d = "972" + d.slice(1); return d; }
+const prevSent = d => state.lastSent && state.lastSent.P && state.lastSent.P.d === d ? state.lastSent : null;
+
+let current = { P: null, text: "", D: null };
+async function refreshSheet() {
+  const P = snapshot(); P.t = Date.now();
+  const prev = prevSent(P.d);
+  const D0 = prev ? diffLists(prev.P, P) : null;
+  const D = nChanges(D0) ? D0 : null;
+  const link = STANDALONE ? `${location.origin}${location.pathname}#${await encodeList(P)}` : (APP_URL || "");
+  current = { P, D, text: messageText(P, link, D) };
+  $("#preview").textContent = current.text;
+  const nm = state.recipient.name || "רם";
+  const n = P.s.reduce((a, s) => a + s[2].length, 0);
+  if (prev && D) {
+    $("#sheetTitle").textContent = `לשלוח עדכון ל${nm}?`;
+    $("#sheetSub").textContent = `${nChanges(D)} שינויים מאז השליחה של ${hhmm(prev.at)}`;
+    $("#waLabel").textContent = `שליחת העדכון ל${nm}`;
+  } else if (prev) {
+    $("#sheetTitle").textContent = `הרשימה כבר נשלחה ל${nm}`;
+    $("#sheetSub").textContent = `אין שינויים מאז ${hhmm(prev.at)}. אפשר לשלוח שוב.`;
+    $("#waLabel").textContent = `שליחה שוב ל${nm}`;
+  } else {
+    $("#sheetTitle").textContent = `לשלוח את הרשימה ל${nm}?`;
+    $("#sheetSub").textContent = `${n} פריטים מ-${P.s.length} מקומות`;
+    $("#waLabel").textContent = `שליחה בוואטסאפ ל${nm}`;
+  }
+  $("#waLink").href = `https://wa.me/${waNumber(state.recipient.phone)}?text=${encodeURIComponent(current.text)}`;
+}
+function openSheet() {
+  $("#rName").value = state.recipient.name || ""; $("#rPhone").value = state.recipient.phone || "";
+  $("#after").hidden = true; $("#sheet").hidden = false; refreshSheet();
+}
+$("#rName").addEventListener("input", e => { state.recipient.name = e.target.value; save(); refreshSheet(); });
+$("#rPhone").addEventListener("input", e => { state.recipient.phone = e.target.value; save(); refreshSheet(); });
+$("#waLink").addEventListener("click", () => {
+  if (current.P) { state.lastSent = { P: current.P, at: current.P.t }; save(); pushToDb(current.P); renderBottom(); }
+  setTimeout(() => $("#after").hidden = false, 600);
+});
+$("#closeSheet").addEventListener("click", () => $("#sheet").hidden = true);
+$("#sheet").addEventListener("click", e => { if (e.target.id === "sheet") $("#sheet").hidden = true; });
+$("#copyBtn").addEventListener("click", async () => {
+  try { await navigator.clipboard.writeText(current.text); toast("הטקסט הועתק"); }
+  catch { const r = document.createRange(); r.selectNodeContents($("#preview")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); toast("הטקסט מסומן, אפשר להעתיק"); }
+});
+
+/* ---------- shared copy (live when this viewer may use the artifact's store) ---------- */
+let dbDoc = null;
+async function initDb() {
+  let db = null;
+  try { db = window.claude && window.claude.use ? await window.claude.use("db") : null; } catch { db = null; }
+  if (!db) return;
+  try { dbDoc = db.doc("lists/current"); } catch { return; }
+  dbDoc.onSnapshot(snap => {
+    if (!snap.exists) return;
+    const d = snap.data(); if (!d || !d.P || !Array.isArray(d.P.s)) return;
+    if (state.lastSent && state.lastSent.at === d.P.t) return; /* our own send */
+    if (applyIncoming(JSON.parse(JSON.stringify(d.P)), "db")) { mode === "shop" ? renderShop() : markShopTab(); }
+  }, () => {});
+}
+function pushToDb(P) { if (dbDoc) dbDoc.set({ P, at: P.t }).catch(() => {}); }
+
+/* ---------- shopping view ---------- */
+let shop = null;
+try { shop = JSON.parse(lsGet(LS_SHOP) || "null"); } catch { shop = null; }
+if (shop && !shop.v2) {
+  const np = {};
+  if (shop.P) Object.entries(shop.picked || {}).forEach(([k, t]) => { const m = k.match(/^(\d+)-(\d+)$/); const st = m && shop.P.s[+m[1]]; const x = st && st[2][+m[2]]; if (x) np[st[0] + "|" + x[0]] = t; });
+  shop = shop.P ? { v2: 1, P: shop.P, picked: np, at: shop.P.t || 0, changes: null, src: "local" } : null;
+}
+if (shop && !shop.src) shop.src = "local";
+const saveShop = () => lsSet(LS_SHOP, JSON.stringify(shop));
+function markShopTab() { $("#mShop").classList.toggle("alert-dot", !!(shop && shop.changes)); }
+
+/* how: "link" (tapped a link from Inbar), "db" (live copy), "manual" (paste or this phone's own list), "force" (load an older link anyway) */
+function applyIncoming(P, how) {
+  P.t = P.t || 0;
+  const src = how === "manual" ? "local" : how === "force" ? "link" : how;
+  const cur = shop && shop.P ? shop : null;
+  const curFromInbar = !!cur && (cur.src === "link" || cur.src === "db");
+  ui.staleLink = null;
+  /* a list that only came from this phone never blocks one Inbar sent */
+  if (curFromInbar && (how === "link" || how === "db") && P.t < (cur.at || 0) && !sameList(cur.P, P)) {
+    if (how === "link") ui.staleLink = P;
+    return false;
+  }
+  if (cur && sameList(cur.P, P)) {
+    cur.at = Math.max(cur.at || 0, P.t); if (src !== "local") cur.src = src; saveShop(); return false;
+  }
+  const keys = new Set(flat(P).keys());
+  const keepPicks = () => { const k = {}; if (cur) Object.entries(cur.picked).forEach(([x, t]) => { if (keys.has(x)) k[x] = t; }); return k; };
+  if (!cur || cur.P.d !== P.d || !curFromInbar || how === "manual") {
+    shop = { v2: 1, P, picked: cur && cur.P.d === P.d ? keepPicks() : {}, at: P.t, changes: null, src };
+    saveShop(); return true;
+  }
+  const D = diffLists(cur.P, P);
+  const picked = keepPicks(); D.changed.forEach(k => delete picked[k]);
+  if (cur.changes) {
+    const added = [...new Set([...cur.changes.added, ...D.added])].filter(k => keys.has(k));
+    D.changed = [...new Set([...cur.changes.changed, ...D.changed])].filter(k => keys.has(k) && !added.includes(k));
+    D.removed = [...new Set([...cur.changes.removed, ...D.removed])].filter(k => !keys.has(k));
+    D.added = added;
+  }
+  shop = { v2: 1, P, picked, at: P.t, changes: { ...D, at: P.t || Date.now() }, src };
+  saveShop(); return true;
+}
+
+function parseMessage(text) {
+  const colorOf = name => state.stores.find(s => s.name === name)?.color || "extra";
+  const P = { d: "", s: [] }; let cur = null;
+  text.split(/\r?\n/).forEach(raw => {
+    const t = raw.replace(/[‎‏]/g, "").trim(); if (!t) return;
+    const h = t.match(/^\*(.+)\*$/);
+    if (h) { const nm = h[1].trim(); if (nm.includes("לך תביא") || nm.startsWith("קניות")) { P.d = (nm.match(/[\d.]+$/) || [""])[0]; return; } cur = [nm, colorOf(nm), []]; P.s.push(cur); return; }
+    if (/^[•\-*·]/.test(t)) {
+      if (!cur) { cur = ["רשימה", "extra", []]; P.s.push(cur); }
+      let body = t.replace(/^[•\-*·]\s*/, ""), note = "";
+      const nm = body.match(/\s*\(([^()]*)\)\s*$/); if (nm) { note = nm[1]; body = body.slice(0, nm.index); }
+      let name = body, q = 1, u = "ללא";
+      const k = body.lastIndexOf(" – ");
+      if (k > 0) { name = body.slice(0, k); const rest = body.slice(k + 3).trim(); const m = rest.match(/^([\d.]+)\s*(.*)$/); if (m) { q = parseFloat(m[1]); u = m[2] || "יח׳"; } else { u = "ללא"; note = note ? `${rest}, ${note}` : rest; } }
+      cur[2].push([name.trim(), q, u, note, ""]);
+    }
+  });
+  P.s = P.s.filter(s => s[2].length);
+  return P.s.length ? P : null;
+}
+
+let lastRects = null;
+function renderShop() {
+  const v = $("#shopView");
+  markShopTab();
+  if (!shop) { v.innerHTML = loadBox(false); renderBottom(); return; }
+  const P = shop.P, C = shop.changes;
+  const keyOfRow = (sn, x) => sn + "|" + x[0];
+  let total = 0, got = 0;
+  P.s.forEach(([sn, , items]) => items.forEach(x => { total++; if (shop.picked[keyOfRow(sn, x)]) got++; }));
+  const stale = ui.staleLink ? `<div class="notice" role="status"><div class="txt"><b>פתחת קישור מהודעה קודמת (${hhmm(ui.staleLink.t)})</b>מוצגת הרשימה העדכנית יותר מ־${hhmm(shop.at)}.</div><button data-act="force">להציג את הקודמת</button></div>` : "";
+  const banner = C ? `<div class="alert" role="alert"><div class="txt"><b>ענבר עדכנה את הרשימה · ${hhmm(C.at)}</b>${diffLines(C, P).map(esc).join("<br>")}</div><button data-act="ack">הבנתי</button></div>` : "";
+  v.innerHTML = `
+    <div class="top"><div><h1>מה נשאר להביא</h1><div class="date">${shop.src === "local" ? `רשימה שנטענה בטלפון הזה · שישי ${esc(P.d)}` : `${P.via === "paste" ? "נטענה מההודעה של ענבר" : "נשלחה מענבר"} ${P.t ? `ב־${hhmm(P.t)} ` : ""}· שישי ${esc(P.d)}`}</div></div>
+      <div class="hbtns">
+      <button class="ghost ${ui.armImport ? "warn" : ""}" data-act="import">${ui.armImport ? "להחליף את הרשימה בעריכה?" : "לערוך את הרשימה הזו"}</button></div></div>
+    <div class="pastebar"><textarea id="pasteBox" rows="1" placeholder="רשימה מענבר? להדביק כאן" aria-label="הדבקת ההודעה מוואטסאפ"></textarea><div class="err" id="pasteErr" hidden></div></div>
+    <div class="progress" aria-hidden="true"><i style="width:${total ? got / total * 100 : 0}%"></i></div>
+    <div class="prog-t">${got === total && total ? "הכל נאסף. שבת שלום!" : `נאספו ${got} מתוך ${total} · נשארו ${total - got}`}</div>
+    ${stale}<div class="stick">${banner}<nav class="strip" aria-label="חנויות">${P.s.map(([n, c, items], si) => {
+      const left = items.filter(x => !shop.picked[keyOfRow(n, x)]).length;
+      return `<button data-act="jump" data-si="${si}" style="--c:var(--${c});--ct:var(--${c}-t)"><span class="dot"></span>${esc(n)}<span class="n">${left || "✓"}</span></button>`; }).join("")}</nav></div>
+    ${P.s.map(([n, c, items], si) => {
+      const rows = items.map(x => { const key = keyOfRow(n, x); return { x, key, t: shop.picked[key] || 0 }; });
+      const todo = rows.filter(r => !r.t), done = rows.filter(r => r.t).sort((a, b) => a.t - b.t);
+      const row = r => { const [nm, q, u, note, ch] = r.x; const qt = qtyText(q, u, ch);
+        const tag = C && C.added.includes(r.key) ? `<span class="tag">חדש</span>` : C && C.changed.includes(r.key) ? `<span class="tag">עודכן</span>` : "";
+        return `<li class="srow ${r.t ? "got" : ""}" data-key="${esc(r.key)}">
+          <div class="main"><div class="nm">${esc(nm)}${qt ? `<span class="qt">${esc(qt)}</span>` : ""}${tag}</div>${note ? `<div class="nt">${esc(note)}</div>` : ""}</div>
+          <button class="pick" data-act="got" data-key="${esc(r.key)}" aria-pressed="${!!r.t}" aria-label="${r.t ? "החזרה לרשימה" : "נאסף"}: ${esc(nm)}">${ICON_CHECK}</button></li>`; };
+      return `<section class="store" id="sh-${si}" style="--c:var(--${c});--ct:var(--${c}-t)">
+        <div class="store-h"><span class="bar"></span><h2>${esc(n)}</h2>
+          ${todo.length ? `<span class="cnt">נשארו ${todo.length}</span>` : `<span class="allgot">הכל בעגלה ✓</span>`}</div>
+        <ul class="items">${todo.map(row).join("")}${done.length && todo.length ? `<li class="got-sep">נאסף</li>` : ""}${done.map(row).join("")}</ul></section>`;
+    }).join("")}`;
+  renderBottom();
+  if (lastRects) { flip(lastRects); lastRects = null; }
+}
+function loadBox(secondary) {
+  const open = !secondary || ui.showLoad || ui.linkError;
+  return `<div class="load" id="loadBox" ${open ? "" : "hidden"}>
+    ${ui.linkError ? `<div class="err">${esc(ui.linkError)}</div>` : ""}
+    <h2>${secondary ? "טעינה מההודעה בוואטסאפ" : "אין עדיין רשימה בטלפון הזה"}</h2>
+    <p>${secondary ? "בוואטסאפ: לחיצה ארוכה על ההודעה של ענבר, ״העתקה״. כאן: לחיצה ארוכה בתיבה, ״הדבקה״." : "בוואטסאפ: לחיצה ארוכה על ההודעה של ענבר ואז ״העתקה״. כאן: לחיצה ארוכה בתיבה ואז ״הדבקה״. הרשימה תיטען מיד."}</p>
+    <textarea id="pasteBox" placeholder="הדביקו כאן את ההודעה מוואטסאפ"></textarea>
+    <div class="err" id="pasteErr" hidden></div>
+    <div class="btns"><button class="primary" data-act="paste">פתיחת הרשימה</button>
+    <button data-act="mine">הרשימה שנערכה בטלפון הזה</button></div>
+  </div>`;
+}
+function flip(before) {
+  document.querySelectorAll("#shopView .srow").forEach(el => {
+    const b = before[el.dataset.key]; if (b === undefined) return;
+    const a = el.getBoundingClientRect(); const dy = b - a.top; if (!dy) return;
+    el.animate([{ transform: `translateY(${dy}px)` }, { transform: "none" }], { duration: 280, easing: "cubic-bezier(.2,.7,.2,1)" });
+  });
+}
+$("#shopView").addEventListener("click", async e => {
+  const b = e.target.closest("[data-act]"); if (!b) return;
+  const act = b.dataset.act;
+  if (act === "got") {
+    const k = b.dataset.key;
+    if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      lastRects = {}; document.querySelectorAll("#shopView .srow").forEach(el => lastRects[el.dataset.key] = el.getBoundingClientRect().top);
+    }
+    if (shop.picked[k]) delete shop.picked[k]; else shop.picked[k] = Date.now();
+    saveShop(); renderShop(); return;
+  }
+  if (act === "force") { const P = ui.staleLink; if (P) { applyIncoming(P, "force"); renderShop(); window.scrollTo(0, 0); } return; }
+  if (act === "import") {
+    if (!ui.armImport) { ui.armImport = true; renderShop(); return; }
+    ui.armImport = false; importToEdit(shop.P); setMode("edit"); toast("הרשימה נטענה לעריכה"); return;
+  }
+  if (act === "ack") { shop.changes = null; saveShop(); renderShop(); return; }
+  if (act === "jump") { document.getElementById("sh-" + b.dataset.si)?.scrollIntoView({ behavior: "smooth", block: "start" }); return; }
+  if (act === "other") { ui.showLoad = !ui.showLoad; ui.linkError = null; renderShop(); if (ui.showLoad) $("#pasteBox")?.focus(); return; }
+  if (act === "mine") { const P = snapshot(); if (!P.s.length) return showErr("ברשימה שנערכה כאן אין עדיין מוצרים מסומנים."); P.t = Date.now(); ui.showLoad = false; ui.linkError = null; applyIncoming(P, "manual"); renderShop(); window.scrollTo(0, 0); return; }
+  if (act === "paste") loadText($("#pasteBox").value);
+});
+let loadingText = false;
+async function loadText(txt) {
+  if (loadingText) return; loadingText = true;
+  try {
+    const m = (txt || "").match(/#(L[zu][A-Za-z0-9_-]+)/);
+    let P = null;
+    try { P = m ? await decodeList(m[1]) : null; } catch { P = null; }
+    if (!P) { P = parseMessage(txt || ""); if (P) P.via = "paste"; }
+    if (!P) { showErr("לא זוהתה רשימה בטקסט. צריך להעתיק את כל ההודעה של ענבר."); return; }
+    if (!P.t) P.t = Date.now();
+    ui.showLoad = false; ui.linkError = null;
+    applyIncoming(P, "force"); setMode("shop");
+    toast(`נטענה הרשימה: ${P.s.reduce((a, x) => a + x[2].length, 0)} פריטים`);
+  } finally { loadingText = false; }
+}
+$("#shopView").addEventListener("paste", e => {
+  if (e.target.id !== "pasteBox") return;
+  const t = e.clipboardData && e.clipboardData.getData("text");
+  if (t) { e.preventDefault(); loadText(t); }
+});
+$("#shopView").addEventListener("input", e => {
+  if (e.target.id === "pasteBox" && e.target.value.includes("•") && e.target.value.length > 30) loadText(e.target.value);
+});
+function importToEdit(P) {
+  Object.values(state.sel).forEach(sl => sl.on = false);
+  P.s.forEach(([sn, color, items]) => {
+    let st = state.stores.find(x => x.name === sn) || state.stores.find(x => x.color === color);
+    if (!st) st = state.stores.find(x => x.id === "extra");
+    items.forEach(([n, q, u, note, ch]) => {
+      let i = st.items.find(x => x.name === n);
+      if (!i) { i = { id: uid(), name: n, unit: u && u !== "ללא" ? u : "יח׳", dq: u === "ללא" ? 0 : (q || 1), reg: false, dn: "", once: true }; st.items.push(i); }
+      state.sel[i.id] = { on: true, qty: u === "ללא" ? 0 : (q ?? i.dq ?? 1), note: note || "", ch: ch || (i.dc || "") };
+    });
+  });
+  state.lastSent = { P, at: P.t || Date.now() };
+  save();
+}
+function showErr(t) { const el = $("#pasteErr"); if (el) { el.textContent = t; el.hidden = false; } }
+
+/* ---------- bottom bar & modes ---------- */
+let mode = lsGet(LS_MODE) === "shop" ? "shop" : "edit";
+function renderBottom() {
+  const bi = $("#bottomIn");
+  if (mode === "edit") {
+    const n = totalOn(), P = snapshot(), ls = prevSent(P.d), nm = state.recipient.name || "רם";
+    const places = state.stores.filter(s => onCount(s)).length;
+    let sum, cta, cls = "cta";
+    if (!ls) { sum = `${n} פריטים ברשימה<span>${places} מקומות</span>`; cta = "סיימתי, לשליחה"; }
+    else if (sameList(ls.P, P)) { sum = `נשלחה ל${esc(nm)} ב־${hhmm(ls.at)} ✓<span>אפשר להמשיך לעדכן עד הקניות</span>`; cta = "שליחה שוב"; cls = "ghost big"; }
+    else { sum = `<em class="pending">יש שינויים שעוד לא נשלחו</em><span>${n} פריטים ברשימה</span>`; cta = "שליחת עדכון"; }
+    bi.innerHTML = `<div class="sum">${sum}</div><button class="${cls}" id="finish" ${n ? "" : "disabled"}>${cta}</button>`;
+    $("#finish").onclick = openSheet;
+    $("#bottom").hidden = false;
+  } else {
+    if (!shop) { $("#bottom").hidden = true; return; }
+    const picked = Object.keys(shop.picked).length;
+    bi.innerHTML = `<div class="sum">${picked ? `${picked} כבר בעגלה` : "לוחצים על העיגול כשמוצר נכנס לעגלה"}</div>
+      ${picked ? `<button class="ghost" id="unpick">איפוס הסימונים</button>` : ""}`;
+    const u = $("#unpick"); if (u) u.onclick = () => { if (u.dataset.arm) { shop.picked = {}; saveShop(); renderShop(); } else { u.dataset.arm = 1; u.textContent = "לאשר איפוס?"; u.classList.add("warn"); } };
+    $("#bottom").hidden = false;
+  }
+}
+function setMode(m) {
+  mode = m; lsSet(LS_MODE, m);
+  $("#mEdit").setAttribute("aria-pressed", m === "edit"); $("#mShop").setAttribute("aria-pressed", m === "shop");
+  $("#editView").hidden = m !== "edit"; $("#shopView").hidden = m !== "shop";
+  m === "edit" ? renderEdit() : renderShop();
+  markShopTab();
+  window.scrollTo(0, 0);
+}
+$("#mEdit").onclick = () => setMode("edit");
+$("#mShop").onclick = () => setMode("shop");
+
+let toastT;
+function toast(t) { let el = $(".toast"); if (!el) { el = document.createElement("div"); el.className = "toast"; el.setAttribute("role", "status"); document.body.appendChild(el); } el.textContent = t; el.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => el.hidden = true, 2600); }
+
+/* ---------- start: a list link in the address opens shopping mode ---------- */
+async function fromHash() {
+  const h = (location.hash || "").slice(1);
+  if (!/^L[zu][A-Za-z0-9_-]+$/.test(h)) return false;
+  try { const P = await decodeList(h); ui.linkError = null; ui.showLoad = false; applyIncoming(P, "link"); setMode("shop"); return true; }
+  catch { ui.linkError = "הקישור מההודעה לא נטען במלואו, והרשימה למטה אינה הרשימה שבהודעה. העתיקו את ההודעה מוואטסאפ והדביקו כאן."; setMode("shop"); return true; }
+}
+window.addEventListener("hashchange", fromHash);
+setMode(mode);
+fromHash();
+initDb();
+if (freshStart) idbGet(LS_STATE).then(j => {
+  try {
+    const s2 = JSON.parse(j || "null"); if (!s2 || !Array.isArray(s2.stores)) return;
+    s2.stores.forEach(st => st.items.forEach(i => { if (!s2.sel[i.id]) s2.sel[i.id] = freshSel(i); }));
+    state = s2; lsSet(LS_STATE, j); if (mode === "edit") renderEdit();
+  } catch {}
+});
+})();
+</script>
+
+</body>
+</html>
